@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table Select — Análise Inteligente de Mesas de Poker</title>
+    <meta name="description" content="Plataforma de tecnologia para análise de dados e seleção inteligente de mesas em comunidades de poker online.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0B0F1A;
+            --bg-secondary: #111827;
+            --bg-card: #161E2E;
+            --bg-card-hover: #1C2640;
+            --accent: #10B981;
+            --accent-light: #34D399;
+            --accent-glow: rgba(16, 185, 129, 0.15);
+            --text-primary: #F1F5F9;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --border: rgba(148, 163, 184, 0.08);
+            --border-accent: rgba(16, 185, 129, 0.2);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-primary); color: var(--text-primary); overflow-x: hidden; line-height: 1.6; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 9999; }
+        .ambient { position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; }
+        .ambient-1 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(16,185,129,0.08), transparent 70%); top: -200px; right: -100px; }
+        .ambient-2 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(59,130,246,0.05), transparent 70%); bottom: 20%; left: -150px; }
+        nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 1.25rem 2rem; backdrop-filter: blur(20px); background: rgba(11, 15, 26, 0.8); border-bottom: 1px solid var(--border); transition: all 0.3s ease; }
+        .nav-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+        .logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
+        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent), #059669); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 800; color: white; font-family: 'Space Mono', monospace; box-shadow: 0 4px 15px rgba(16,185,129,0.3); }
+        .logo-text { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em; }
+        .logo-text span { color: var(--accent); }
+        .nav-links { display: flex; gap: 2rem; align-items: center; list-style: none; }
+        .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--accent-light); }
+        .nav-cta { background: var(--accent) !important; color: var(--bg-primary) !important; padding: 0.6rem 1.5rem; border-radius: 8px; font-weight: 600 !important; transition: all 0.2s !important; }
+        .nav-cta:hover { background: var(--accent-light) !important; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(16,185,129,0.3); }
+        .mobile-menu { display: none; background: none; border: none; color: var(--text-primary); font-size: 1.5rem; cursor: pointer; }
+        .hero { position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 8rem 2rem 4rem; text-align: center; z-index: 1; }
+        .hero-content { max-width: 800px; }
+        .hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1.25rem; background: var(--accent-glow); border: 1px solid var(--border-accent); border-radius: 100px; font-size: 0.85rem; color: var(--accent-light); font-weight: 500; margin-bottom: 2rem; animation: fadeInUp 0.8s ease; }
+        .hero-badge::before { content: ''; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.5); } }
+        .hero h1 { font-size: clamp(2.5rem, 6vw, 4.2rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 1.5rem; animation: fadeInUp 0.8s ease 0.1s both; }
+        .hero h1 .highlight { background: linear-gradient(135deg, var(--accent), var(--accent-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .hero p { font-size: 1.2rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto 2.5rem; line-height: 1.7; animation: fadeInUp 0.8s ease 0.2s both; }
+        .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; animation: fadeInUp 0.8s ease 0.3s both; }
+        .btn-primary { display: inline-flex; align-items: center; gap: 0.5rem; padding: 1rem 2rem; background: linear-gradient(135deg, var(--accent), #059669); color: white; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.3s ease; box-shadow: 0 4px 25px rgba(16,185,129,0.25); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 35px rgba(16,185,129,0.35); }
+        .btn-secondary { display: inline-flex; align-items: center; gap: 0.5rem; padding: 1rem 2rem; background: transparent; color: var(--text-primary); border: 1px solid var(--border); border-radius: 12px; font-size: 1rem; font-weight: 500; cursor: pointer; text-decoration: none; transition: all 0.3s ease; }
+        .btn-secondary:hover { border-color: var(--text-muted); background: rgba(255,255,255,0.03); }
+        .stats-bar { position: relative; z-index: 1; max-width: 900px; margin: -2rem auto 0; padding: 2rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; }
+        .stat { text-align: center; }
+        .stat-value { font-family: 'Space Mono', monospace; font-size: 2rem; font-weight: 700; color: var(--accent); }
+        .stat-label { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem; }
+        section { position: relative; z-index: 1; padding: 6rem 2rem; }
+        .section-inner { max-width: 1100px; margin: 0 auto; }
+        .section-header { text-align: center; margin-bottom: 4rem; }
+        .section-tag { font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 1rem; }
+        .section-header h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 1rem; }
+        .section-header p { color: var(--text-secondary); max-width: 550px; margin: 0 auto; font-size: 1.05rem; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
+        .feature-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; transition: all 0.3s ease; }
+        .feature-card:hover { background: var(--bg-card-hover); border-color: var(--border-accent); transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .feature-icon { width: 48px; height: 48px; background: var(--accent-glow); border: 1px solid var(--border-accent); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 1.25rem; }
+        .feature-card h3 { font-size: 1.15rem; font-weight: 600; margin-bottom: 0.75rem; }
+        .feature-card p { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; }
+        .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; counter-reset: step; }
+        .step { position: relative; padding: 2rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; counter-increment: step; }
+        .step::before { content: counter(step, decimal-leading-zero); font-family: 'Space Mono', monospace; font-size: 3rem; font-weight: 700; color: var(--accent); opacity: 0.15; position: absolute; top: 1rem; right: 1.5rem; line-height: 1; }
+        .step h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.75rem; }
+        .step p { color: var(--text-secondary); font-size: 0.9rem; }
+        .platforms-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+        .platform-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; text-align: center; transition: all 0.3s ease; }
+        .platform-card:hover { border-color: var(--border-accent); background: var(--bg-card-hover); }
+        .platform-card .emoji { font-size: 2rem; margin-bottom: 0.75rem; display: block; }
+        .platform-card h4 { font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem; }
+        .platform-card p { color: var(--text-muted); font-size: 0.8rem; }
+        .faq-list { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
+        .faq-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+        .faq-question { width: 100%; background: none; border: none; color: var(--text-primary); padding: 1.25rem 1.5rem; font-size: 1rem; font-weight: 600; text-align: left; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.2s; }
+        .faq-question:hover { background: rgba(255,255,255,0.02); }
+        .faq-question .icon { font-size: 1.2rem; color: var(--accent); transition: transform 0.3s ease; }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+        .faq-answer.open { max-height: 200px; }
+        .faq-answer p { padding: 0 1.5rem 1.25rem; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; }
+        .cta-section { text-align: center; padding: 5rem 2rem; }
+        .cta-box { max-width: 700px; margin: 0 auto; background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(59,130,246,0.05)); border: 1px solid var(--border-accent); border-radius: 24px; padding: 4rem 3rem; }
+        .cta-box h2 { font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+        .cta-box p { color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.05rem; }
+        footer { position: relative; z-index: 1; border-top: 1px solid var(--border); padding: 3rem 2rem; }
+        .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; }
+        .footer-info p { color: var(--text-muted); font-size: 0.85rem; }
+        .footer-info .name { color: var(--text-secondary); font-weight: 500; }
+        .footer-links { display: flex; gap: 2rem; }
+        .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+        .footer-links a:hover { color: var(--accent); }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { opacity: 0; transform: translateY(20px); transition: all 0.6s ease; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+        @media (max-width: 768px) { .nav-links { display: none; } .mobile-menu { display: block; } .stats-bar { grid-template-columns: 1fr; gap: 1.5rem; margin: -1rem 1rem 0; } .features-grid, .steps { grid-template-columns: 1fr; } .platforms-grid { grid-template-columns: repeat(2, 1fr); } .cta-box { padding: 2.5rem 1.5rem; } .footer-inner { flex-direction: column; text-align: center; } }
+    </style>
+</head>
+<body>
+<div class="ambient ambient-1"></div>
+<div class="ambient ambient-2"></div>
+<nav><div class="nav-inner"><a href="#" class="logo"><div class="logo-icon">TS</div><div class="logo-text">Table<span>Select</span></div></a><ul class="nav-links"><li><a href="#features">Recursos</a></li><li><a href="#como-funciona">Como Funciona</a></li><li><a href="#plataformas">Plataformas</a></li><li><a href="#faq">FAQ</a></li><li><a href="#contato" class="nav-cta">Fale Conosco</a></li></ul><button class="mobile-menu" onclick="document.querySelector('.nav-links').classList.toggle('show')">☰</button></div></nav>
+<section class="hero"><div class="hero-content"><div class="hero-badge">Plataforma de Análise de Dados para Poker</div><h1>Encontre a <span class="highlight">mesa ideal</span> para o seu jogo</h1><p>Tecnologia de análise inteligente que compara comunidades de poker online, avalia tráfego de mesas e recomenda o melhor ambiente para o seu perfil de jogador.</p><div class="hero-actions"><a href="#contato" class="btn-primary">Começar Agora</a><a href="#como-funciona" class="btn-secondary">Saiba Mais →</a></div></div></section>
+<div class="stats-bar fade-in"><div class="stat"><div class="stat-value">78+</div><div class="stat-label">Clubes Analisados</div></div><div class="stat"><div class="stat-value">5</div><div class="stat-label">Plataformas Cobertas</div></div><div class="stat"><div class="stat-value">24/7</div><div class="stat-label">Suporte Disponível</div></div></div>
+<section id="features"><div class="section-inner"><div class="section-header fade-in"><div class="section-tag">Recursos</div><h2>Análise inteligente para decisões melhores</h2><p>Ferramentas baseadas em dados para você escolher onde jogar com confiança.</p></div><div class="features-grid"><div class="feature-card fade-in"><div class="feature-icon">📊</div><h3>Análise de Tráfego</h3><p>Monitoramento em tempo real do volume de jogadores em cada mesa e comunidade, para você encontrar mesas com ação na sua modalidade preferida.</p></div><div class="feature-card fade-in"><div class="feature-icon">🎯</div><h3>Recomendação Personalizada</h3><p>Algoritmo inteligente que considera sua modalidade, nível de experiência e preferências para sugerir as melhores comunidades para seu perfil.</p></div><div class="feature-card fade-in"><div class="feature-icon">📈</div><h3>Comparativo de Clubes</h3><p>Compare comunidades lado a lado com dados objetivos: modalidades disponíveis, variedade de mesas, qualidade do suporte e tráfego médio.</p></div><div class="feature-card fade-in"><div class="feature-icon">🤖</div><h3>Atendimento com IA</h3><p>Assistente virtual disponível 24 horas para tirar dúvidas, recomendar comunidades e ajudar você a encontrar o melhor ambiente de jogo.</p></div><div class="feature-card fade-in"><div class="feature-icon">🔔</div><h3>Alertas Personalizados</h3><p>Receba notificações quando mesas da sua modalidade e nível preferidos estiverem com bom tráfego nas comunidades que você acompanha.</p></div><div class="feature-card fade-in"><div class="feature-icon">📱</div><h3>Multi-Plataforma</h3><p>Cobertura das principais plataformas de poker online, tudo centralizado em um único painel de análise para facilitar sua decisão.</p></div></div></div></section>
+<section id="como-funciona" style="background: var(--bg-secondary);"><div class="section-inner"><div class="section-header fade-in"><div class="section-tag">Como Funciona</div><h2>Simples, rápido e baseado em dados</h2><p>Em três passos você encontra a comunidade ideal para o seu jogo.</p></div><div class="steps"><div class="step fade-in"><h3>Conte seu perfil</h3><p>Informe sua modalidade preferida (NLH, PLO, torneios), nível de experiência e o que você busca em uma comunidade de poker.</p></div><div class="step fade-in"><h3>Receba análises</h3><p>Nosso sistema analisa dados de mais de 78 comunidades em 5 plataformas e gera recomendações personalizadas baseadas no seu perfil.</p></div><div class="step fade-in"><h3>Escolha e jogue</h3><p>Compare as opções recomendadas, tire suas dúvidas com nosso suporte e entre na comunidade que melhor atende suas necessidades.</p></div></div></div></section>
+<section id="plataformas"><div class="section-inner"><div class="section-header fade-in"><div class="section-tag">Plataformas</div><h2>Cobertura das principais plataformas</h2><p>Analisamos comunidades nas plataformas mais populares de poker online.</p></div><div class="platforms-grid fade-in"><div class="platform-card"><span class="emoji">♠️</span><h4>PPPoker</h4><p>Clubes e unions</p></div><div class="platform-card"><span class="emoji">♣️</span><h4>PokerBros</h4><p>Clubes e ligas</p></div><div class="platform-card"><span class="emoji">♥️</span><h4>ClubGG</h4><p>Clubes verificados</p></div><div class="platform-card"><span class="emoji">♦️</span><h4>Suprema Poker</h4><p>Comunidades ativas</p></div><div class="platform-card"><span class="emoji">🃏</span><h4>UPoker</h4><p>Clubes globais</p></div></div></div></section>
+<section id="faq" style="background: var(--bg-secondary);"><div class="section-inner"><div class="section-header fade-in"><div class="section-tag">Perguntas Frequentes</div><h2>Dúvidas comuns</h2></div><div class="faq-list fade-in"><div class="faq-item"><button class="faq-question" onclick="toggleFaq(this)">O que é a Table Select?<span class="icon">+</span></button><div class="faq-answer"><p>A Table Select é uma plataforma de tecnologia especializada em análise de dados e seleção inteligente de mesas de poker online. Ajudamos jogadores a encontrar a comunidade ideal para seu perfil através de recomendações baseadas em dados.</p></div></div><div class="faq-item"><button class="faq-question" onclick="toggleFaq(this)">A Table Select é uma casa de jogos?<span class="icon">+</span></button><div class="faq-answer"><p>Não. A Table Select é uma plataforma de consultoria e análise de dados. Não operamos jogos, não processamos transações financeiras e não gerenciamos comunidades de poker. Nosso serviço é exclusivamente de análise, comparação e recomendação.</p></div></div><div class="faq-item"><button class="faq-question" onclick="toggleFaq(this)">Como funciona o atendimento?<span class="icon">+</span></button><div class="faq-answer"><p>Oferecemos atendimento via WhatsApp com suporte de inteligência artificial, disponível 24 horas. Nosso assistente virtual responde dúvidas, analisa seu perfil de jogador e recomenda comunidades compatíveis com suas preferências.</p></div></div><div class="faq-item"><button class="faq-question" onclick="toggleFaq(this)">Quais plataformas vocês cobrem?<span class="icon">+</span></button><div class="faq-answer"><p>Atualmente analisamos comunidades em 5 plataformas: PPPoker, PokerBros, ClubGG, Suprema Poker e UPoker. Cobrimos mais de 78 comunidades com dados atualizados de tráfego e modalidades.</p></div></div><div class="faq-item"><button class="faq-question" onclick="toggleFaq(this)">O serviço é gratuito?<span class="icon">+</span></button><div class="faq-answer"><p>Sim, oferecemos um plano gratuito com acesso às recomendações básicas e atendimento via WhatsApp. Também disponibilizamos planos com recursos avançados de análise para jogadores que desejam dados mais detalhados.</p></div></div></div></div></section>
+<section class="cta-section" id="contato"><div class="cta-box fade-in"><h2>Pronto para encontrar sua mesa ideal?</h2><p>Fale com nosso assistente e receba recomendações personalizadas em minutos.</p><a href="https://wa.me/5500000000000" class="btn-primary" target="_blank">Falar via WhatsApp</a></div></section>
+<footer><div class="footer-inner"><div class="footer-info"><p class="name">Table Select — Análise Inteligente de Mesas</p><p>© 2026 Clauber Junio Fonseca Castro. Todos os direitos reservados.</p><p>Plataforma de tecnologia e análise de dados. Não operamos jogos de azar.</p></div><div class="footer-links"><a href="#">Termos de Uso</a><a href="#">Privacidade</a><a href="mailto:contato@tableselect.com.br">Contato</a></div></div></footer>
+<script>
+function toggleFaq(btn){const a=btn.nextElementSibling;const i=btn.querySelector('.icon');const o=a.classList.contains('open');document.querySelectorAll('.faq-answer').forEach(x=>x.classList.remove('open'));document.querySelectorAll('.faq-question .icon').forEach(x=>x.textContent='+');if(!o){a.classList.add('open');i.textContent='−';}}
+const observer=new IntersectionObserver((entries)=>{entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('visible');}});},{threshold:0.1});document.querySelectorAll('.fade-in').forEach(el=>observer.observe(el));
+window.addEventListener('scroll',()=>{const n=document.querySelector('nav');if(window.scrollY>50){n.style.padding='0.75rem 2rem';}else{n.style.padding='1.25rem 2rem';}});
+</script>
+</body>
+</html>
